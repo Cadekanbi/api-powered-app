@@ -7,12 +7,14 @@ const jsonHandler = require('./jsonResponses.js');
 const port = process.env.PORT || process.env.NODE_PORT || 3000;
 
 const urlStruct = {
-  '/': htmlHandler.getIndex,
+  '/welcome': htmlHandler.getIndex,
+  '/': htmlHandler.getHome,
   '/style.css': htmlHandler.getCSS,
   '/client.js': htmlHandler.getJS,
   '/getUsers': jsonHandler.getUsers,
   '/notReal': jsonHandler.notReal,
   '/addUser': jsonHandler.addUser,
+  '/getGames': jsonHandler.getGames,
   notFound: jsonHandler.notFound,
 };
 

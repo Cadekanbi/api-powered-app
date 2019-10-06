@@ -1,14 +1,13 @@
 
+// Stored server content
 const users = {};
+const content = {};
+const apiRequests = require('./apiRequests.js');
+// age
 
 const jsonResponse = (request, response, status, object) => {
   response.writeHead(status, { 'content-type': 'application/json' });
   response.write(JSON.stringify(object));
-  response.end();
-};
-
-const jsonResponseMeta = (request, response, status) => {
-  response.writeHead(status, { 'content-type': 'application/json' });
   response.end();
 };
 
@@ -17,26 +16,30 @@ const getUsers = (request, response) => {
   const obj = {
     users,
   };
-
   return jsonResponse(request, response, 200, obj);
 };
 
-const notReal = (request, response) => {
-  let obj = {
-      id: 'notFound',
-      message: 'The page you are looking for was not found.',
-    };
+const getGames = (request, response) => {
+  content.games = apiRequests.getGamesData();
+  return jsonResponse(request, response, 200, content);
+};
 
-    return jsonResponse(request, response, 404, obj);
+const notReal = (request, response) => {
+  const obj = {
+    id: 'notFound',
+    message: 'The page you are looking for was not found.',
+  };
+
+  return jsonResponse(request, response, 404, obj);
 };
 
 const addUser = (request, response, body) => {
   const obj = {
-    message: 'Name and age are both required.',
+    message: 'Missing information',
   };
 
   // check both fields
-  if ((!body.name || !body.age)) {
+  if ((!body.name || !body.age) || !body.favorites) {
     obj.id = 'missingParams';
     return jsonResponse(request, response, 400, obj);
   }
@@ -52,14 +55,17 @@ const addUser = (request, response, body) => {
   // update
   users[body.name].name = body.name;
   users[body.name].age = body.age;
+  users[body.name].favorites = body.favorites;
 
   // response w/ message
   if (responseCode === 201) {
     obj.message = 'Created Successfully';
     return jsonResponse(request, response, responseCode, obj);
   }
+
+  return jsonResponse(request, response, responseCode, obj);
   // 204 response
-  return jsonResponseMeta(request, response, responseCode);
+  // return jsonResponseMeta(request, response, responseCode);
 };
 
 const notFound = (request, response) => {
@@ -76,4 +82,5 @@ module.exports = {
   addUser,
   notReal,
   notFound,
+  getGames,
 };

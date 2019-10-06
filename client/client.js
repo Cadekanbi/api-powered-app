@@ -1,102 +1,111 @@
 
-const parseJSON = (xhr, content) => {
-    // parse response
-    const obj = xhr.response ? JSON.parse(xhr.response) : {};
-
-    // if the server sent a message add it to the screen
-    if (obj.message) {
-        const p = document.createElement('p');
-        p.textContent = `Message: ${obj.message}`;
-        content.appendChild(p);
-    }
-
-    // if response has users, render it
-    if (obj.users) {
-        const userList = document.createElement('p');
-        const users = JSON.stringify(obj.users);
-        userList.textContent = users;
-        content.appendChild(userList);
-    }
+const parseJSON = (xhr) => {
+    const response = JSON.parse(xhr.response);
+    console.log(response.games);
+    return JSON.parse(response['games']);
 };
 
-const handleResponse = (xhr, isHEAD) => {
+const handleResponse = (xhr, data) => {
     // retrieve content
-    const content = document.querySelector('#content');
+    const feed = document.querySelector('#content');
+    let parsedResponse;
 
     // xhr status code check
     switch (xhr.status) {
         case 200:
-            content.innerHTML = `<b>Success</b>`;
-            break;
-        case 201:
-            content.innerHTML = `<b>Create</b>`;
-            break; 
-        case 204:
-            content.innerHTML = `<b>Updated (No Content)</b>`;
-            break;    
-        case 400:
-            content.innerHTML = `<b>Bad Request</b>`;
+            console.log('Success!');
+            parsedResponse = parseJSON(xhr, data);
             break;
         case 404:
-            content.innerHTML = `<b>Resource Not Found</b>`;
+            console.log('Resource not found.');
             break;
         default:
-            content.innerHTML = `Error code not implemented by client.`;
+            console.log('Well Crap... :/');
+            break;
     }
+    // const p = document.createElement('p');
+    // p.textContent = `Message: ${obj.message}`;
+    // content.appendChild(p);
 
-    if (!isHEAD || xhr.status !== 204) {
-      parseJSON(xhr, content);  
-    }
+    if (parsedResponse) {
+        const count = parsedResponse.limit;
+        const results = parsedResponse.results;
+        for (let i = 0; i < count; i++) {
+            const img = document.createElement('img');
+            img.src = results[i].image.square_small;
+            const h2 = document.createElement('h2');
+            h2.textContent = results[i].name;
+            const p = document.createElement('p');
+            p.textContent = results[i].description;
+            feed.appendChild(img);
+            feed.appendChild(h2);
+            feed.appendChild(p);
+        }
+    } 
 };
 
-const addUser = (e, form) => {
-    const nameAction = form.getAttribute('action');
-    const nameMethod = form.getAttribute('method');
-    // retrieve doc elements
-    const nameField = document.querySelector('#nameField');
-    const ageField = document.querySelector('#ageField');
+// const addUser = (e, form) => {
+//     const nameAction = form.getAttribute('action');
+//     const nameMethod = form.getAttribute('method');
+//     // retrieve doc elements
+//     const nameField = document.querySelector('#nameField');
+//     const ageField = document.querySelector('#ageField');
     
+//     const xhr = new XMLHttpRequest();
+
+//     xhr.open(nameMethod, nameAction);
+//     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencodedd');
+//     xhr.setRequestHeader('Accept', 'application/json');
+//     xhr.onload = () => handleResponse(xhr, false);
+
+//     const formData = `name=${nameField.value}&age=${ageField.value}`;
+
+//     xhr.send(formData);
+//     e.preventDefault();
+    
+//     return false;
+// };
+
+// const getUser = () => {
+//     const url = document.querySelector('#urlField');
+//     const method = document.querySelector('#methodSelect');
+    
+//     const xhr = new XMLHttpRequest();
+
+//     xhr.open(method.value, url.value);
+//     xhr.setRequestHeader('Accept', 'application/json');
+//     xhr.onload = () => handleResponse(xhr, method.value === 'head' ? true : false);
+
+//     xhr.send();
+//     e.preventDefault();
+    
+//     return false;
+// };
+
+const getGames = () => {
     const xhr = new XMLHttpRequest();
 
-    xhr.open(nameMethod, nameAction);
-    xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencodedd');
+    xhr.open('GET', '/getGames');
     xhr.setRequestHeader('Accept', 'application/json');
-    xhr.onload = () => handleResponse(xhr, false);
-
-    const formData = `name=${nameField.value}&age=${ageField.value}`;
-
-    xhr.send(formData);
-    e.preventDefault();
-    
-    return false;
-};
-
-const getUsers = (e) => {
-    const url = document.querySelector('#urlField');
-    const method = document.querySelector('#methodSelect');
-    
-    const xhr = new XMLHttpRequest();
-
-    xhr.open(method.value, url.value);
-    xhr.setRequestHeader('Accept', 'application/json');
-    xhr.onload = () => handleResponse(xhr, method.value === 'head' ? true : false);
-
+    xhr.onload = () => handleResponse(xhr, 'games');
     xhr.send();
-    e.preventDefault();
     
     return false;
 };
+
 
 const initialize = () => {
-    // get button elements
-    const addUserElem = document.querySelector('#nameForm');
-    const getUserElem = document.querySelector('#userForm');
-    // functions to call
-    const requestAddUser = (e) => addUser(e, addUserElem);
-    const requestGetUsers = (e) => getUsers(e, getUserElem);
-    // attach to listener
-    addUserElem.addEventListener('submit', requestAddUser);
-    getUserElem.addEventListener('submit', requestGetUsers);
+    // // get button elements
+    // const addUserElem = document.querySelector('#nameForm');
+    // const getUserElem = document.querySelector('#userForm');
+    // // functions to call
+    // const requestAddUser = (e) => addUser(e, addUserElem);
+    // const requestGetUsers = (e) => getUsers(e, getUserElem);
+
+    getGames();
+    // // attach to listener
+    // addUserElem.addEventListener('submit', requestAddUser);
+    // getUserElem.addEventListener('submit', requestGetUsers);
 };
 
 window.onload = initialize;

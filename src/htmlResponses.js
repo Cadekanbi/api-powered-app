@@ -1,6 +1,7 @@
 const fs = require('fs');
 
-const index = fs.readFileSync(`${__dirname}/../client/client.html`);
+const index = fs.readFileSync(`${__dirname}/../client/index.html`);
+const home = fs.readFileSync(`${__dirname}/../client/home.html`);
 const css = fs.readFileSync(`${__dirname}/../client/style.css`);
 const js = fs.readFileSync(`${__dirname}/../client/client.js`);
 
@@ -14,6 +15,10 @@ const getIndex = (request, response) => {
   responseHead(request, response, 200, 'text/html', index);
 };
 
+const getHome = (request, response) => {
+  responseHead(request, response, 200, 'text/html', home);
+};
+
 const getCSS = (request, response) => {
   responseHead(request, response, 200, 'text/css', css);
 };
@@ -24,6 +29,7 @@ const getJS = (request, response) => {
 
 module.exports = {
   getIndex,
+  getHome,
   getCSS,
   getJS,
 };
